@@ -23,6 +23,13 @@ public class Section {
     @JoinColumn(name = "blog_id", nullable = false)
     private Blog blog; // Each section belongs to a blog
 
+    @ManyToOne
+    @JoinColumn(name = "parent_section_id")
+    private Section parentSection; // For nested sections
+
+    @OneToMany(mappedBy = "parentSection", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<Section> subSections; // List of nested sections
+
     @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<ContentBlock> contentBlocks; // Each section contains multiple content blocks
 }
