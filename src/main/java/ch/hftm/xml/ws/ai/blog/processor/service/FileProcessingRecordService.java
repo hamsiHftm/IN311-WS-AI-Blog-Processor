@@ -26,4 +26,13 @@ public class FileProcessingRecordService {
         LOG.info("Stored file record: " + htmlFilePath);
         return record;
     }
+
+    public FileProcessingRecord getFileProcessingRecord(Long id) {
+        return fileProcessingRecordRepository.findById(id);
+    }
+
+    @Transactional
+    public void updateFileProcessingRecord(FileProcessingRecord record) {
+        fileProcessingRecordRepository.persist(record);
+    }
 }
