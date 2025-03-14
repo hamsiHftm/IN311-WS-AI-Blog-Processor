@@ -10,7 +10,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.jboss.resteasy.reactive.RestQuery;
 
-@Path("/files")
+@Path("/test")
 @Produces(MediaType.APPLICATION_JSON)
 public class TestAIResource {
 
@@ -18,6 +18,7 @@ public class TestAIResource {
     TestAIService testAIService;
 
     @GET
+    @Path("/create/blog")
     public String createBlog(@RestQuery String topic) {
         return testAIService.writeBlog(topic);
     }
