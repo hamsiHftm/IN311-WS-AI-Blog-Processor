@@ -33,6 +33,28 @@ public class FileProcessingRecordService {
 
     @Transactional
     public void updateFileProcessingRecord(FileProcessingRecord record) {
-        fileProcessingRecordRepository.persist(record);
+        FileProcessingRecord existingRecord = fileProcessingRecordRepository.findById(record.getId());
+
+        if (existingRecord != null) {
+            existingRecord.setStatus(record.getStatus());
+            existingRecord.setJsonFileName(record.getJsonFileName());
+            existingRecord.setJsonFilePath(record.getJsonFilePath());
+
+            fileProcessingRecordRepository.persistAndFlush(existingRecord);
+        } else {
+            throw new IllegalStateException("FileProcessingRecord not found for ID: " + record.getId());
+        }
+    }
+
+    @Transactional
+    public void updateStatusForRecord(Long id, ProcessingStatus status) {
+        FileProcessingRecord record = fileProcessingRecordRepository.findById(id);
+
+        if (record != null) {
+            record.setStatus(status);
+            fileProcessingRecordRepository.persistAndFlush(record);
+        } else {
+            throw new IllegalStateException("FileProcessingRecord not found for ID: " + id);
+        }
     }
 }

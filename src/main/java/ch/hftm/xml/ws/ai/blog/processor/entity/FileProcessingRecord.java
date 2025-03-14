@@ -18,6 +18,7 @@ public class FileProcessingRecord {
 
     private String htmlFilePath;  // Path to the uploaded HTML file
     private String jsonFilePath;  // Path to generated JSON file (AI output)
+    private String jsonFileName;
 
     @Enumerated(EnumType.STRING)
     private ProcessingStatus status = ProcessingStatus.PENDING; // PENDING, PROCESSED, etc.

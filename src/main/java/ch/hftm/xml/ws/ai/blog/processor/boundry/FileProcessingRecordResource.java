@@ -1,14 +1,14 @@
 package ch.hftm.xml.ws.ai.blog.processor.boundry;
 
-import ch.hftm.xml.ws.ai.blog.processor.dto.request.FileUploadRequestDTO;
 import ch.hftm.xml.ws.ai.blog.processor.dto.response.FileUploadResponseDTO;
 import ch.hftm.xml.ws.ai.blog.processor.dto.response.ErrorResponseDTO1;
 import ch.hftm.xml.ws.ai.blog.processor.entity.FileProcessingRecord;
 import ch.hftm.xml.ws.ai.blog.processor.entity.ProcessingStatus;
+import ch.hftm.xml.ws.ai.blog.processor.service.FileProcessingProducer;
 import ch.hftm.xml.ws.ai.blog.processor.service.FileProcessingRecordService;
 
+import ch.hftm.xml.ws.ai.blog.processor.service.FileProcessingWorker;
 import ch.hftm.xml.ws.ai.blog.processor.service.FileService;
-import ch.hftm.xml.ws.ai.blog.processor.service.ai.HTMLParsingAIService;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -19,10 +19,11 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestQuery;
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Optional;
 
 @Path("/files")
 @Produces(MediaType.APPLICATION_JSON)
@@ -37,7 +38,7 @@ public class FileProcessingRecordResource {
     FileService fileService;
 
     @Inject
-    HTMLParsingAIService htmlParsingAIService;
+    FileProcessingProducer fileProcessingProducer;
 
     @POST
     @Path("/upload")
@@ -78,7 +79,6 @@ public class FileProcessingRecordResource {
 
     @POST
     @Path("/generate/json/{fileProcessingRecordId}")
-    @Transactional
     public Response generateJson(@PathParam("fileProcessingRecordId") Long recordId,
                                  @RestQuery String JsonFilePathDes) {
         try {
@@ -91,19 +91,14 @@ public class FileProcessingRecordResource {
             // Read the HTML file content
             String htmlContent = fileService.readHtmlFile(record);
 
-            // Convert HTML to JSON format using AI
-            String jsonContent = htmlParsingAIService.parseHTMLToJson(htmlContent);
-
-            // Save JSON to a fixed directory
-            String jsonFilePath = fileService.saveJsonFile(jsonContent, JsonFilePathDes, recordId);
-
-            // Update the record with the JSON file path
-            record.setJsonFilePath(jsonFilePath);
-            record.setStatus(ProcessingStatus.PROCESSED);
+            record.setStatus(ProcessingStatus.PROCESSING);
+            record.setJsonFilePath(JsonFilePathDes);
             fileProcessingRecordService.updateFileProcessingRecord(record);
 
-            LOG.info("Generated JSON file for record ID: " + recordId);
-            return Response.ok("JSON file generated and saved successfully: " + jsonFilePath).build();
+            fileProcessingProducer.sendProcessingRequest(recordId);
+
+            LOG.info("Started JSON generation for record ID: " + recordId);
+            return Response.ok("Processing started for record ID: " + recordId).build();
 
         } catch (IOException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

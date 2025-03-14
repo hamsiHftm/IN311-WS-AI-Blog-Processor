@@ -64,14 +64,14 @@ public class FileService {
             directory.mkdirs(); // Ensure directory exists
         }
 
-        String filePath = jsonDirectory + "record_" + recordId + ".json";
-        File jsonFile = new File(filePath);
+        String fileName = recordId + ".json";
+        File jsonFile = new File(jsonDirectory, fileName);
 
         try (FileWriter writer = new FileWriter(jsonFile, StandardCharsets.UTF_8)) {
             writer.write(jsonContent);
         }
 
-        LOG.info("JSON file saved successfully: " + filePath);
-        return filePath;
+        LOG.info("JSON file saved successfully: " + jsonDirectory + fileName);
+        return fileName;
     }
 }
