@@ -37,7 +37,6 @@ public class FileProcessingRecordService {
 
         if (existingRecord != null) {
             existingRecord.setStatus(record.getStatus());
-            existingRecord.setJsonFileName(record.getJsonFileName());
             existingRecord.setJsonFilePath(record.getJsonFilePath());
 
             fileProcessingRecordRepository.persistAndFlush(existingRecord);

@@ -2,6 +2,7 @@ package ch.hftm.xml.ws.ai.blog.processor.boundry;
 
 import ch.hftm.xml.ws.ai.blog.processor.dto.response.FileUploadResponseDTO;
 import ch.hftm.xml.ws.ai.blog.processor.dto.response.ErrorResponseDTO1;
+import ch.hftm.xml.ws.ai.blog.processor.dto.response.ResponseDTO1;
 import ch.hftm.xml.ws.ai.blog.processor.entity.FileProcessingRecord;
 import ch.hftm.xml.ws.ai.blog.processor.entity.ProcessingStatus;
 import ch.hftm.xml.ws.ai.blog.processor.service.FileProcessingProducer;
@@ -51,12 +52,13 @@ public class FileProcessingRecordResource {
                 throw new IllegalStateException("File validation failed. Unknown error.");
             }
             FileProcessingRecord record = fileProcessingRecordService.uploadFile(path);
-            return Response.ok(new FileUploadResponseDTO(
+            return Response.ok(new ResponseDTO1(true, new FileUploadResponseDTO(
                     record.getId(),
                     record.getHtmlFilePath(),
+                    record.getJsonFilePath(),
                     record.getStatus(),
                     "File uploaded successfully"
-            )).build();
+            ))).build();
         } catch (FileNotFoundException | IllegalStateException e) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new ErrorResponseDTO1(e.getMessage()))
@@ -79,36 +81,89 @@ public class FileProcessingRecordResource {
 
     @POST
     @Path("/generate/json/{fileProcessingRecordId}")
-    public Response generateJson(@PathParam("fileProcessingRecordId") Long recordId,
-                                 @RestQuery String JsonFilePathDes) {
+    public Response generateJson(@PathParam("fileProcessingRecordId") Long recordId) {
         try {
             // Retrieve the record
             FileProcessingRecord record = fileProcessingRecordService.getFileProcessingRecord(recordId);
             if (record == null) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity("FileProcessingRecord not found for ID: " + recordId).build();
+                        .entity(new ErrorResponseDTO1("FileProcessingRecord not found for ID: " + recordId))
+                        .build();
             }
-            // Read the HTML file content
-            String htmlContent = fileService.readHtmlFile(record);
 
+            // Check if the file is already processed
+            if (record.getStatus() == ProcessingStatus.PROCESSED) {
+                return Response.ok(new ResponseDTO1(true, new FileUploadResponseDTO(
+                        recordId,
+                        record.getHtmlFilePath(),
+                        record.getJsonFilePath(),
+                        ProcessingStatus.PROCESSED,
+                        "Processing already completed. JSON file available at: " + record.getJsonFilePath() + record.getJsonFilePath()
+                ))).build();
+            }
+
+            // Check if the file is already processed
+            if (record.getStatus() == ProcessingStatus.PROCESSING) {
+                return Response.ok(new ResponseDTO1(true, new FileUploadResponseDTO(
+                        recordId,
+                        record.getHtmlFilePath(),
+                        record.getJsonFilePath(),
+                        ProcessingStatus.PROCESSING,
+                        "Processing already started."
+                ))).build();
+            }
+
+            // Update record status and file path
             record.setStatus(ProcessingStatus.PROCESSING);
-            record.setJsonFilePath(JsonFilePathDes);
             fileProcessingRecordService.updateFileProcessingRecord(record);
 
+            // Send processing request to Kafka
             fileProcessingProducer.sendProcessingRequest(recordId);
 
             LOG.info("Started JSON generation for record ID: " + recordId);
-            return Response.ok("Processing started for record ID: " + recordId).build();
 
-        } catch (IOException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("File processing error: " + e.getMessage()).build();
+            return Response.ok(new ResponseDTO1(true, new FileUploadResponseDTO(
+                    recordId,
+                    record.getHtmlFilePath(),
+                    record.getJsonFilePath(),
+                    ProcessingStatus.PROCESSING,
+                    "Processing started successfully."
+            ))).build();
+
         } catch (Exception e) {
             LOG.error("Unexpected error while generating JSON: ", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Unexpected error: " + e.getMessage()).build();
+                    .entity(new ErrorResponseDTO1("Unexpected error: " + e.getMessage()))
+                    .build();
         }
     }
 
+    @GET
+    @Path("/status/{fileProcessingRecordId}")
+    public Response getFileProcessingStatus(@PathParam("fileProcessingRecordId") Long recordId) {
+        try {
+            // Retrieve the record
+            FileProcessingRecord record = fileProcessingRecordService.getFileProcessingRecord(recordId);
+            if (record == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(new ErrorResponseDTO1("FileProcessingRecord not found for ID: " + recordId))
+                        .build();
+            }
 
+            // Construct response with relevant details
+            return Response.ok(new ResponseDTO1(true, new FileUploadResponseDTO(
+                    recordId,
+                    record.getHtmlFilePath(),
+                    record.getJsonFilePath(),
+                    record.getStatus(),
+                    "Current status: " + record.getStatus()
+            ))).build();
+
+        } catch (Exception e) {
+            LOG.error("Unexpected error while retrieving status: ", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponseDTO1("Unexpected error: " + e.getMessage()))
+                    .build();
+        }
+    }
 }

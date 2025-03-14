@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets;
 public class FileService {
 
     private static final Logger LOG = Logger.getLogger(FileService.class);
-    private static final String JSON_SAVE_DIRECTORY = "/opt/app/json_output/";
+    private static final String JSON_SAVE_DIRECTORY = "data/output/json/";
 
     public boolean validateFile(String filePath,String fileType) throws Exception {
         File file = new File(filePath);
@@ -58,20 +58,35 @@ public class FileService {
         return Files.readString(filePath, StandardCharsets.UTF_8);
     }
 
-    public String saveJsonFile(String jsonContent, String jsonDirectory, Long recordId) throws IOException {
-        File directory = new File(jsonDirectory);
+    public String saveJsonFile(String jsonContent, Long recordId) throws IOException {
+        File directory = new File(JSON_SAVE_DIRECTORY);
         if (!directory.exists()) {
             directory.mkdirs(); // Ensure directory exists
         }
 
+        String cleanedJson = cleanJsonString(jsonContent);
+
         String fileName = recordId + ".json";
-        File jsonFile = new File(jsonDirectory, fileName);
+        File jsonFile = new File(JSON_SAVE_DIRECTORY, fileName);
 
         try (FileWriter writer = new FileWriter(jsonFile, StandardCharsets.UTF_8)) {
-            writer.write(jsonContent);
+            writer.write(cleanedJson);
         }
 
-        LOG.info("JSON file saved successfully: " + jsonDirectory + fileName);
-        return fileName;
+        LOG.info("JSON file saved successfully: " + JSON_SAVE_DIRECTORY + fileName);
+        return JSON_SAVE_DIRECTORY + fileName;
+    }
+
+    public String cleanJsonString(String aiGeneratedJson) {
+        if (aiGeneratedJson == null || aiGeneratedJson.isBlank()) {
+            return "{}"; // Return empty JSON object if input is invalid
+        }
+
+        // Remove leading ```json and trailing ```
+        String cleanedJson = aiGeneratedJson.trim()
+                .replaceAll("^```json", "")  // Remove the AI-starting markdown
+                .replaceAll("```$", "");   // Remove the AI-ending markdown
+
+        return cleanedJson.trim();
     }
 }

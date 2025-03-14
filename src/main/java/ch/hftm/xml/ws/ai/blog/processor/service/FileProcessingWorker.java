@@ -131,9 +131,8 @@ public class FileProcessingWorker {
                     }
                     ```
                     """;
-            String jsonFileName = fileService.saveJsonFile(jsonContent, record.getJsonFilePath(), recordId);
-
-            record.setJsonFileName(jsonFileName);
+            String jsonFilePath = fileService.saveJsonFile(jsonContent, recordId);
+            record.setJsonFilePath(jsonFilePath);
             record.setStatus(ProcessingStatus.PROCESSED);
             fileProcessingRecordService.updateFileProcessingRecord(record);
 
