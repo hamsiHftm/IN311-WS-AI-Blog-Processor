@@ -4,5 +4,5 @@ import jakarta.validation.constraints.NotBlank;
 
 public record FileUploadRequestDTO(
         @NotBlank(message = "File path must not be empty")
-        String htmlFilePath
+        String pdfFilePath
 ) {}

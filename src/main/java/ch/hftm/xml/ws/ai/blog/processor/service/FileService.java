@@ -20,8 +20,8 @@ public class FileService {
             throw new FileNotFoundException("File not found: " + filePath);
         }
 
-        if (!filePath.toLowerCase().endsWith(".html")) {
-            throw new IllegalArgumentException("Invalid file type. Only .html files are allowed.");
+        if (!filePath.toLowerCase().endsWith(".pdf")) {
+            throw new IllegalArgumentException("Invalid file type. Only .pdf files are allowed.");
         }
 
         if (!Files.isReadable(file.toPath())) {

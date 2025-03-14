@@ -15,7 +15,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -36,18 +35,18 @@ public class FileProcessingRecordResource {
     @Transactional
     public Response uploadFile(@Valid FileUploadRequestDTO request) {
         try {
-            boolean isValid = fileService.validateFile(request.htmlFilePath());
+            boolean isValid = fileService.validateFile(request.pdfFilePath());
             if (!isValid) {
-                throw new Exception("File validation failed");
+                throw new IllegalStateException("File validation failed. Unknown error.");
             }
-            FileProcessingRecord record = fileProcessingRecordService.uploadFile(request.htmlFilePath());
+            FileProcessingRecord record = fileProcessingRecordService.uploadFile(request.pdfFilePath());
             return Response.ok(new FileUploadResponseDTO(
                     record.getId(),
                     record.getHtmlFilePath(),
                     record.getStatus(),
                     "File uploaded successfully"
             )).build();
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException | IllegalStateException e) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity(new ErrorResponseDTO1(e.getMessage()))
                     .build();
