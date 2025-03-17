@@ -8,67 +8,57 @@ import io.quarkiverse.langchain4j.RegisterAiService;
 public interface HTMLParsingAIService {
 
     @SystemMessage("You are an AI-powered HTML parser that extracts structured blog content from raw HTML.")
-    @UserMessage("""
-            Extract structured blog content from the provided HTML input and return a JSON structure 
-            following this format:
 
+    @UserMessage("""
+            Extract structured blog content from the provided HTML input and return a **valid JSON object**. 
+            Ensure **headings, paragraphs, lists (including nested lists), tables, and images** are correctly structured. 
+            
+            **Return only the JSON output, without any additional text, explanations, or markdown.** 
+            Do **not** include any preambles like 'Here is your JSON output'.  
+            
+            ---
+            
+            **Expected JSON Structure:**
+            ```json
             {
               "title": "Extracted Blog Title",
               "content": [
                 {
                   "type": "HEADING",
-                  "level": 1,
-                  "value": "Introduction",
+                  "level": 2,
+                  "value": "Main Heading",
                   "orderIndex": 1
                 },
                 {
                   "type": "PARAGRAPH",
-                  "value": "This is an introduction paragraph providing an overview of the blog.",
+                  "value": "This is a paragraph describing the content.",
                   "orderIndex": 2
                 },
                 {
-                  "type": "SECTION",
-                  "orderIndex": 3,
-                  "content": [
+                  "type": "LIST",
+                  "listType": "unordered",
+                  "items": [
                     {
-                      "type": "HEADING",
-                      "level": 2,
-                      "value": "Main Section",
-                      "orderIndex": 4
-                    },
-                    {
-                      "type": "PARAGRAPH",
-                      "value": "This section contains important details.",
-                      "orderIndex": 5
-                    },
-                    {
-                      "type": "LIST",
-                      "listType": "unordered",
-                      "items": [
-                        "First list item",
-                        "Second list item",
-                        "Third list item"
-                      ],
-                      "orderIndex": 6
-                    },
-                    {
-                      "type": "SECTION",
-                      "orderIndex": 7,
-                      "content": [
+                      "value": "Main item 1",
+                      "subItems": [
                         {
-                          "type": "HEADING",
-                          "level": 3,
-                          "value": "Nested Subsection",
-                          "orderIndex": 8
+                          "value": "Sub-item 1.1"
                         },
                         {
-                          "type": "PARAGRAPH",
-                          "value": "This is content inside the nested subsection.",
-                          "orderIndex": 9
+                          "value": "Sub-item 1.2"
+                        }
+                      ]
+                    },
+                    {
+                      "value": "Main item 2",
+                      "subItems": [
+                        {
+                          "value": "Sub-item 2.1"
                         }
                       ]
                     }
-                  ]
+                  ],
+                  "orderIndex": 3
                 },
                 {
                   "type": "TABLE",
@@ -77,20 +67,23 @@ public interface HTMLParsingAIService {
                     ["Row 1 Col 1", "Row 1 Col 2"],
                     ["Row 2 Col 1", "Row 2 Col 2"]
                   ],
-                  "orderIndex": 10
+                  "orderIndex": 4
                 },
                 {
                   "type": "IMAGE",
                   "value": "https://example.com/image.jpg",
-                  "orderIndex": 11
+                  "orderIndex": 5
                 }
               ]
             }
-
-            Ensure the extracted JSON is valid, well-structured, and follows the correct orderIndex 
-            based on the original HTML structure.
+            ```
             
-            Parse the following HTML content: {htmlContent}
+            ---
+            
+            **Now, parse the following HTML and return only the JSON output:**  
+            ```html
+            {htmlContent}
+            ```
             """)
     String parseHTMLToJson(String htmlContent);
 }

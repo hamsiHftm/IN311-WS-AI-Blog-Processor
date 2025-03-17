@@ -58,19 +58,19 @@ public class FileProcessingWorker {
                         {
                           "type": "HEADING",
                           "level": 2,
-                          "value": "Internationales Luftrecht",
+                          "value": "2 Internationales Luftrecht",
                           "orderIndex": 1
                         },
                         {
                           "type": "HEADING",
                           "level": 3,
-                          "value": "Einleitung",
+                          "value": "2.1 Einleitung",
                           "orderIndex": 2
                         },
                         {
                           "type": "HEADING",
                           "level": 4,
-                          "value": "Der Luftraum und die Lufthoheit",
+                          "value": "2.1.1 Der Luftraum und die Lufthoheit",
                           "orderIndex": 3
                         },
                         {
@@ -86,7 +86,7 @@ public class FileProcessingWorker {
                         {
                           "type": "HEADING",
                           "level": 4,
-                          "value": "Die internationale Normenhierarchie",
+                          "value": "2.1.2 Die internationale Normenhierarchie",
                           "orderIndex": 6
                         },
                         {
@@ -98,43 +98,115 @@ public class FileProcessingWorker {
                           "type": "LIST",
                           "listType": "unordered",
                           "items": [
-                            "Völkerrecht",
-                            "Internationales Luftrecht",
-                            "Regionales Luftrecht (im Sinne von supranationalem europäischem Luftrecht)",
-                            "Nationale Quellen"
+                            {
+                              "value": "Völkerrecht",
+                              "subItems": [
+                                {
+                                  "value": "Gesetze und Gebräuche des Völkerrechtes"
+                                }
+                              ]
+                            },
+                            {
+                              "value": "Internationales Luftrecht",
+                              "subItems": [
+                                {
+                                  "value": "multilaterale Abkommen (insbesondere das Übereinkommen über die internationale Zivilluftfahrt, das sogenannte Abkommen von Chicago, nachstehend mit CHI abgekürzt) mit entsprechenden Anhängen und Dokumenten"
+                                },
+                                {
+                                  "value": "bilaterale Abkommen (z.B. der Staatsvertrag mit Frankreich betreffend den Flughafen Basel oder der Staatsvertrag mit Österreich betreffend den Flugplatz St.Gallen-Altenrhein)"
+                                },
+                                {
+                                  "value": "Anhänge, Änderungsprotokolle und Dokumente zu internationalen Abkommen (so z.B. die 19 Anhänge zum Abkommen von Chicago)"
+                                }
+                              ]
+                            },
+                            {
+                              "value": "Regionales Luftrecht (im Sinne von supranationalem europäischem Luftrecht)",
+                              "subItems": [
+                                {
+                                  "value": "Verordnungen der Europäischen Union (bei Anträgen der EASA auch als EASA-Rules bezeichnet)"
+                                },
+                                {
+                                  "value": "Richtlinien des Europäischen Rates"
+                                }
+                              ]
+                            },
+                            {
+                              "value": "Nationale Quellen",
+                              "subItems": [
+                                {
+                                  "value": "Bundesverfassung (insbesondere Art. 87)"
+                                },
+                                {
+                                  "value": "Bundesgesetze (insbesondere das Luftfahrtgesetz)"
+                                },
+                                {
+                                  "value": "Verordnungen des Bundesrates (insbesondere die Luftfahrtverordnung)"
+                                },
+                                {
+                                  "value": "Weisungen und Richtlinien des Bundesamtes für Zivilluftfahrt (BAZL)"
+                                }
+                              ]
+                            }
                           ],
                           "orderIndex": 8
                         },
                         {
                           "type": "PARAGRAPH",
-                          "value": "Die internationale Normenhierarchie hat eine grosse Bedeutung für das Luftrecht der Schweiz. Als beispielsweise der Anhang 1 zum Abkommen von Chicago mit den Vorschriften über Berechtigungen für das Luftfahrtpersonal (Personal Licensing) dahingehend geändert wurde, dass für den Erwerb der Privatpilotenlizenz (PPL) insgesamt 40 statt wie vorher nur 35 Flugstunden erforderlich sein sollen, musste auch die Schweiz diese Regelung übernehmen. Die Schweiz hat das Abkommen von Chicago nämlich ratifiziert und somit als verbindliche Regelung anerkannt. Hätte sie die Änderung nicht übernommen, wären die schweizerischen Privatpilotenausweise im Ausland sehr bald nicht mehr akzeptiert worden. Dasselbe hat sich später mit den europäischen Vorschriften wiederholt. Die Kandidaten für eine PPL(A)-Lizenz müssen zum Zeitpunkt der praktischen Prüfung jetzt mindestens 45 Flugstunden nachzuweisen. Ein neuer Standard schreibt nun vor, dass Piloten mit einer Light Aircraft Pilot Licence (LAPL), die eine PPL(A)-Privatpilotenlizenz erwerben möchten, 10 Stunden zusätzliche Flugausbildung absolvieren müssen. Wenn das Bundesamt für Zivilluftfahrt neue oder geänderte Vorschriften erlässt, handelt es sich folglich nicht um eine eigene Aktion, sondern meist um eine Reaktion auf den Druck des internationalen Luftfahrtrechts.",
+                          "value": "Die internationale Normenhierarchie hat eine grosse Bedeutung für das Luftrecht der Schweiz. Als beispielsweise der Anhang 1 zum Abkommen von Chicago mit den Vorschriften über Berechtigungen für das Luftfahrtpersonal (Personal Licensing) dahingehend geändert wurde, dass für den Erwerb der Privatpilotenlizenz (PPL) insgesamt 40 statt wie vorher nur 35 Flugstunden erforderlich sein sollen, musste auch die Schweiz diese Regelung übernehmen. Die Schweiz hat das Abkommen von Chicago nämlich ratifiziert und somit als verbindliche Regelung anerkannt. Hätte sie die Änderung nicht übernommen, wären die schweizerischen Privatpilotenausweise im Ausland sehr bald nicht mehr akzeptiert worden.",
                           "orderIndex": 9
+                        },
+                        {
+                          "type": "PARAGRAPH",
+                          "value": "Dasselbe hat sich später mit den europäischen Vorschriften wiederholt. Die Kandidaten für eine PPL(A)-Lizenz müssen zum Zeitpunkt der praktischen Prüfung jetzt mindestens 45 Flugstunden nachzuweisen. Ein neuer Standard schreibt nun vor, dass Piloten mit einer Light Aicraft Pilot Licence (LAPL), die eine PPL(A)-Privatpilotenlizenz erwerben möchten, 10 Stunden zusätzliche Flugausbildung absolvieren müssen. Wenn das Bundesamt für Zivilluftfahrt neue oder geänderte Vorschriften erlässt, handelt es sich folglich nicht um eine eigene Aktion, sondern meist um eine Reaktion auf den Druck des internationalen Luftfahrtrechts.",
+                          "orderIndex": 10
                         },
                         {
                           "type": "HEADING",
                           "level": 4,
-                          "value": "Die Luftfahrtbehörden im Überblick",
-                          "orderIndex": 10
+                          "value": "2.1.3 Die Luftfahrtbehörden im Überblick",
+                          "orderIndex": 11
                         },
                         {
                           "type": "PARAGRAPH",
                           "value": "Schon die Vielfalt der Rechtsquellen lässt vermuten, dass es auch verschiedene Behörden gibt, welche die Luftrechtsnormen vollziehen. Auch hier kann zwischen internationalen, regionalen (im Sinne von europäischen) und nationalen Behörden unterschieden werden.",
-                          "orderIndex": 11
+                          "orderIndex": 12
                         },
                         {
                           "type": "LIST",
                           "listType": "unordered",
                           "items": [
-                            "Internationale Luftfahrtbehörden",
-                            "Europäische Luftfahrtbehörden",
-                            "Nationale Luftfahrtbehörden"
+                            {
+                              "value": "Internationale Luftfahrtbehörden",
+                              "subItems": [
+                                {
+                                  "value": "ICAO (International Civil Aviation Organisation / Internationale Zivilluftfahrt Organisation), eine Unterorganisation der UNO mit Sitz in Montreal / Canada"
+                                }
+                              ]
+                            },
+                            {
+                              "value": "Europäische Luftfahrtbehörden",
+                              "subItems": [
+                                {
+                                  "value": "EASA (Europäische Agentur für Flugsicherheit / European Aviation Safety Agency), unabhängige europäische Sicherheits- und Aufsichtsbehörde für die Zivilluftfahrt"
+                                }
+                              ]
+                            },
+                            {
+                              "value": "Nationale Luftfahrtbehörden",
+                              "subItems": [
+                                {
+                                  "value": "NAA (National Aviation Authority / Nationale Zivilluftfahrtbehörde), in der Schweiz das Bundesamt für Zivilluftfahrt (BAZL) mit Sitz in Bern"
+                                }
+                              ]
+                            }
                           ],
-                          "orderIndex": 12
+                          "orderIndex": 13
                         },
                         {
                           "type": "PARAGRAPH",
-                          "value": "Von diesen Luftfahrtbehörden ist die ICAO mit Abstand am wichtigsten. Ihre Erlass sind für die über 170 Vertragsstaaten des Übereinkommens über die Zivilluftfahrt verbindlich. Es bleibt den einzelnen Vertragsstaaten überlassen, ob sie die ICAO-Vorschriften als direkt anwendbar erklären oder über nationale Erlass in das Landesrecht umsetzen wollen.",
-                          "orderIndex": 13
+                          "value": "Von diesen Luftfahrtbehörden ist die ICAO mit Abstand am wichtigsten. Ihre Erlasse sind für die über 170 Vertragsstaaten des Übereinkommens über die Zivilluftfahrt verbindlich. Es bleibt den einzelnen Vertragsstaaten überlassen, ob sie die ICAO-Vorschriften als direkt anwendbar erklären oder über nationale Erlass in das Landesrecht umsetzen wollen.",
+                          "orderIndex": 14
                         }
                       ]
                     }

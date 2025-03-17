@@ -1,17 +1,25 @@
 package ch.hftm.xml.ws.ai.blog.processor.service;
 
-import ch.hftm.xml.ws.ai.blog.processor.entity.Blog;
-import ch.hftm.xml.ws.ai.blog.processor.entity.ContentBlock;
-import ch.hftm.xml.ws.ai.blog.processor.entity.Section;
+import ch.hftm.xml.ws.ai.blog.processor.entity.*;
+import ch.hftm.xml.ws.ai.blog.processor.service.model.BlogService;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
+
+import java.io.StringReader;
 
 @ApplicationScoped
 public class BlogHtmlGeneratorService {
-    public String generateHtml(Blog blog) {
-        StringBuilder html = new StringBuilder();
 
-        // Start HTML Document
-        html.append("<!DOCTYPE html>")
+    @Inject
+    BlogService blogService;
+
+    public String generateHtml(Blog blog) {
+        StringBuilder htmlBuilder = new StringBuilder();
+        htmlBuilder.append("<!DOCTYPE html>")
                 .append("<html lang='en'>")
                 .append("<head>")
                 .append("<meta charset='UTF-8'>")
@@ -29,69 +37,108 @@ public class BlogHtmlGeneratorService {
                 .append("</style>")
                 .append("</head><body>");
 
-        // Blog Title
-        html.append("<h1>").append(blog.getTitle()).append("</h1>");
+        htmlBuilder.append("<h1>").append(blog.getTitle()).append("</h1>");
 
-        // Loop through sections
         for (Section section : blog.getSections()) {
-            generateSectionHtml(html, section);
+            renderSection(section, htmlBuilder);
         }
 
-        // Close HTML
-        html.append("</body></html>");
-
-        return html.toString();
+        htmlBuilder.append("</body></html>");
+        return htmlBuilder.toString();
     }
 
-    private void generateSectionHtml(StringBuilder html, Section section) {
+    private void renderSection(Section section, StringBuilder htmlBuilder) {
         if (section.getSectionTitle() != null && !section.getSectionTitle().isBlank()) {
-            html.append("<h2>").append(section.getSectionTitle()).append("</h2>");
+            htmlBuilder.append("<h2>").append(section.getSectionTitle()).append("</h2>");
         }
 
-        for (ContentBlock block : section.getContentBlocks()) {
-            switch (block.getType()) {
+        for (ContentBlock contentBlock : section.getContentBlocks()) {
+            switch (contentBlock.getType()) {
                 case HEADING:
-                    html.append("<h").append(block.getLevel()).append(">")
-                            .append(block.getValue())
-                            .append("</h").append(block.getLevel()).append(">");
+                    htmlBuilder.append("<h").append(contentBlock.getLevel()).append(">")
+                            .append(contentBlock.getValue())
+                            .append("</h").append(contentBlock.getLevel()).append(">");
                     break;
                 case PARAGRAPH:
-                    html.append("<p>").append(block.getValue()).append("</p>");
+                    htmlBuilder.append("<p>").append(contentBlock.getValue()).append("</p>");
                     break;
                 case LIST:
-                    html.append("<ul>");
-                    for (String item : block.getItems().replace("[", "").replace("]", "").split(",")) {
-                        html.append("<li>").append(item.trim().replace("\"", "")).append("</li>");
-                    }
-                    html.append("</ul>");
+                    renderNestedList(contentBlock, htmlBuilder);
                     break;
                 case TABLE:
-                    html.append("<table><tr>");
-                    for (String col : block.getColumns().replace("[", "").replace("]", "").split(",")) {
-                        html.append("<th>").append(col.trim().replace("\"", "")).append("</th>");
-                    }
-                    html.append("</tr>");
-                    for (String row : block.getRows().replace("[", "").replace("]", "").split("],")) {
-                        html.append("<tr>");
-                        for (String cell : row.replace("[", "").replace("]", "").split(",")) {
-                            html.append("<td>").append(cell.trim().replace("\"", "")).append("</td>");
-                        }
-                        html.append("</tr>");
-                    }
-                    html.append("</table>");
+                    renderTable(contentBlock, htmlBuilder);
                     break;
                 case IMAGE:
-                    html.append("<img src='").append(block.getValue()).append("' alt='Image'>");
+                    htmlBuilder.append("<img src='").append(contentBlock.getValue()).append("' alt='Image'>");
                     break;
                 default:
-                    html.append("<p>[Unknown Content]</p>");
                     break;
             }
         }
 
-        // Render nested sections
         for (Section subSection : section.getSubSections()) {
-            generateSectionHtml(html, subSection);
+            renderSection(subSection, htmlBuilder);
+        }
+    }
+
+    private void renderNestedList(ContentBlock contentBlock, StringBuilder htmlBuilder) {
+        String listTag = contentBlock.getListType().equalsIgnoreCase("ordered") ? "ol" : "ul";
+        htmlBuilder.append("<").append(listTag).append(">");
+
+        JsonArray itemsArray = parseJsonArray(contentBlock.getItems());
+
+        for (int i = 0; i < itemsArray.size(); i++) {
+            JsonObject item = itemsArray.getJsonObject(i);
+            htmlBuilder.append("<li>").append(item.getString("value"));
+
+            // Check if subItems exist
+            if (item.containsKey("subItems")) {
+                JsonArray subItemsArray = item.getJsonArray("subItems");
+                if (!subItemsArray.isEmpty()) {
+                    htmlBuilder.append("<ul>");
+                    for (int j = 0; j < subItemsArray.size(); j++) {
+                        JsonObject subItem = subItemsArray.getJsonObject(j);
+                        htmlBuilder.append("<li>").append(subItem.getString("value")).append("</li>");
+                    }
+                    htmlBuilder.append("</ul>");
+                }
+            }
+
+            htmlBuilder.append("</li>");
+        }
+
+        htmlBuilder.append("</").append(listTag).append(">");
+    }
+
+    private void renderTable(ContentBlock contentBlock, StringBuilder htmlBuilder) {
+        JsonArray columns = parseJsonArray(contentBlock.getColumns());
+        JsonArray rows = parseJsonArray(contentBlock.getRows());
+
+        htmlBuilder.append("<table border='1'><thead><tr>");
+        for (int i = 0; i < columns.size(); i++) {
+            htmlBuilder.append("<th>").append(columns.getString(i)).append("</th>");
+        }
+        htmlBuilder.append("</tr></thead><tbody>");
+
+        for (int i = 0; i < rows.size(); i++) {
+            JsonArray row = rows.getJsonArray(i);
+            htmlBuilder.append("<tr>");
+            for (int j = 0; j < row.size(); j++) {
+                htmlBuilder.append("<td>").append(row.getString(j)).append("</td>");
+            }
+            htmlBuilder.append("</tr>");
+        }
+
+        htmlBuilder.append("</tbody></table>");
+    }
+
+    private JsonArray parseJsonArray(String jsonArrayString) {
+        if (jsonArrayString == null || jsonArrayString.isBlank()) {
+            return Json.createArrayBuilder().build();
+        }
+
+        try (JsonReader reader = Json.createReader(new StringReader(jsonArrayString))) {
+            return reader.readArray();
         }
     }
 }

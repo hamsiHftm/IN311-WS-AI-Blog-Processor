@@ -35,6 +35,9 @@ public class ContentBlock {
     private String items; // Stores JSON array for list items
 
     @Column(columnDefinition = "TEXT")
+    private String subItems; // Stores nested list items
+
+    @Column(columnDefinition = "TEXT")
     private String columns; // Stores JSON array for table column names
 
     @Column(columnDefinition = "TEXT")

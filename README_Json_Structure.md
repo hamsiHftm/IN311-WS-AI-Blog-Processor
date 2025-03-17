@@ -48,19 +48,45 @@ The example JSON file is available in the `resources` folder under the name `exa
           "orderIndex": 6
         },
         {
+          "type": "LIST",
+          "listType": "unordered",
+          "items": [
+            {
+              "value": "Main item 1",
+              "subItems": [
+                {
+                  "value": "Sub-item 1.1"
+                },
+                {
+                  "value": "Sub-item 1.2"
+                }
+              ]
+            },
+            {
+              "value": "Main item 2",
+              "subItems": [
+                {
+                  "value": "Sub-item 2.1"
+                }
+              ]
+            }
+          ],
+          "orderIndex": 7
+        },
+        {
           "type": "SECTION",
-          "orderIndex": 7,
+          "orderIndex": 8,
           "content": [
             {
               "type": "HEADING",
               "level": 3,
               "value": "Nested Subsection",
-              "orderIndex": 8
+              "orderIndex": 9
             },
             {
               "type": "PARAGRAPH",
               "value": "This is content inside the nested subsection.",
-              "orderIndex": 9
+              "orderIndex": 10
             }
           ]
         }
@@ -73,12 +99,12 @@ The example JSON file is available in the `resources` folder under the name `exa
         ["Row 1 Col 1", "Row 1 Col 2"],
         ["Row 2 Col 1", "Row 2 Col 2"]
       ],
-      "orderIndex": 10
+      "orderIndex": 11
     },
     {
       "type": "IMAGE",
       "value": "https://example.com/image.jpg",
-      "orderIndex": 11
+      "orderIndex": 12
     }
   ]
 }
@@ -94,6 +120,7 @@ The example JSON file is available in the `resources` folder under the name `exa
 - **`orderIndex`**: Defines the order of content appearance.
 - **`listType`** (for LISTS): Defines whether the list is "ordered" or "unordered".
 - **`items`** (for LISTS): Contains list items.
+- **`subitems`** (for LISTS): Contains list of nested items from list.
 - **`columns`** (for TABLES): Defines table column names.
 - **`rows`** (for TABLES): Contains table row data.
 - **`values`** (for SECTIONS): A nested list of content items within a section.

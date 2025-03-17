@@ -37,6 +37,8 @@ public class JsonProcessingService {
         static final String ITEMS = "items";
         static final String COLUMNS = "columns";
         static final String ROWS = "rows";
+        public static String SUB_ITEMS = "subItems";
+
     }
 
     @Transactional
@@ -105,6 +107,11 @@ public class JsonProcessingService {
                 list.setType(ContentType.LIST);
                 list.setListType(contentObject.getString(JsonKeys.LIST_TYPE, "unordered"));
                 list.setItems(contentObject.getJsonArray(JsonKeys.ITEMS).toString());
+
+                if (contentObject.containsKey(JsonKeys.SUB_ITEMS)) {
+                    list.setSubItems(contentObject.getJsonArray(JsonKeys.SUB_ITEMS).toString()); // Store as JSON string
+                }
+
                 list.setOrderIndex(orderIndex);
                 attachToParent(parentSection, list, blog);
                 break;
