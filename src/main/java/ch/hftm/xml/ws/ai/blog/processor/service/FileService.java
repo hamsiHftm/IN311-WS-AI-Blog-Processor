@@ -2,12 +2,12 @@ package ch.hftm.xml.ws.ai.blog.processor.service;
 
 import ch.hftm.xml.ws.ai.blog.processor.entity.FileProcessingRecord;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 import org.jboss.logging.Logger;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
@@ -88,5 +88,14 @@ public class FileService {
                 .replaceAll("```$", "");   // Remove the AI-ending markdown
 
         return cleanedJson.trim();
+    }
+
+    public JsonObject readJsonFile(FileProcessingRecord record) throws Exception {
+        File jsonFile = new File(record.getJsonFilePath());
+        String jsonContent = Files.readString(jsonFile.toPath());
+
+        try (JsonReader reader = Json.createReader(new StringReader(jsonContent))) {
+            return reader.readObject();
+        }
     }
 }

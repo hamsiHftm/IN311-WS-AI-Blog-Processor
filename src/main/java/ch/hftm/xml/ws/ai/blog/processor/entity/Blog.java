@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -21,7 +22,7 @@ public class Blog {
     private String title;  // Blog title
 
     @OneToMany(mappedBy = "blog", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<Section> sections; // A blog contains multiple sections
+    private List<Section> sections = new ArrayList<>();
 
     private LocalDateTime createdAt = LocalDateTime.now();
 }

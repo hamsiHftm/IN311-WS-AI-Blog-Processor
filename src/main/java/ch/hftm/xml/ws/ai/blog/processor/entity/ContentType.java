@@ -6,5 +6,13 @@ public enum ContentType {
     IMAGE,        // Image URL
     LIST,         // Ordered/unordered list
     TABLE,        // Table (stored as JSON inside "rows" & "columns")
-    SECTION       // Nested section
+    SECTION;       // Nested section
+
+    public static ContentType fromString(String type) {
+        try {
+            return ContentType.valueOf(type.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null; // Return null for unknown types (or handle differently)
+        }
+    }
 }

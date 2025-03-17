@@ -3,6 +3,7 @@ package ch.hftm.xml.ws.ai.blog.processor.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -28,8 +29,8 @@ public class Section {
     private Section parentSection; // For nested sections
 
     @OneToMany(mappedBy = "parentSection", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<Section> subSections; // List of nested sections
+    private List<Section> subSections = new ArrayList<>();
 
     @OneToMany(mappedBy = "section", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<ContentBlock> contentBlocks; // Each section contains multiple content blocks
+    private List<ContentBlock> contentBlocks = new ArrayList<>();
 }
