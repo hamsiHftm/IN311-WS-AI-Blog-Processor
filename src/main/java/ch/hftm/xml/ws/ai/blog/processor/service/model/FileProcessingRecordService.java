@@ -1,6 +1,7 @@
-package ch.hftm.xml.ws.ai.blog.processor.service;
+package ch.hftm.xml.ws.ai.blog.processor.service.model;
 
 import ch.hftm.xml.ws.ai.blog.processor.entity.FileProcessingRecord;
+import ch.hftm.xml.ws.ai.blog.processor.entity.FileType;
 import ch.hftm.xml.ws.ai.blog.processor.entity.ProcessingStatus;
 import ch.hftm.xml.ws.ai.blog.processor.repository.FileProcessingRecordRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -17,9 +18,10 @@ public class FileProcessingRecordService {
     FileProcessingRecordRepository fileProcessingRecordRepository;
 
     @Transactional
-    public FileProcessingRecord uploadFile(String htmlFilePath) {
+    public FileProcessingRecord uploadFile(String htmlFilePath, FileType fileType) {
         FileProcessingRecord record = new FileProcessingRecord();
-        record.setHtmlFilePath(htmlFilePath);
+        record.setFilePath(htmlFilePath);
+        record.setFileType(fileType);
         record.setStatus(ProcessingStatus.PENDING);
 
         fileProcessingRecordRepository.persist(record);

@@ -1,8 +1,12 @@
-package ch.hftm.xml.ws.ai.blog.processor.service;
+package ch.hftm.xml.ws.ai.blog.processor.service.messaging;
 
 import ch.hftm.xml.ws.ai.blog.processor.entity.FileProcessingRecord;
 import ch.hftm.xml.ws.ai.blog.processor.entity.ProcessingStatus;
+import ch.hftm.xml.ws.ai.blog.processor.service.FileService;
 import ch.hftm.xml.ws.ai.blog.processor.service.ai.HTMLParsingAIService;
+import ch.hftm.xml.ws.ai.blog.processor.service.model.FileProcessingRecordService;
+import io.smallrye.mutiny.Uni;
+import io.smallrye.mutiny.infrastructure.Infrastructure;
 import io.smallrye.reactive.messaging.annotations.Blocking;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;
@@ -29,9 +33,14 @@ public class FileProcessingWorker {
 
     @Incoming("file-processing-worker")
     @Transactional
-    @Blocking
     @ActivateRequestContext
-    public void processFile(Long recordId) {
+    public Uni<Void> processFileAsync(Long recordId) {
+        return Uni.createFrom().item(recordId)
+                .onItem().transformToUni(id -> Uni.createFrom().voidItem().invoke(() -> processFile(id)))
+                .runSubscriptionOn(Infrastructure.getDefaultWorkerPool());
+    }
+
+    private void processFile(Long recordId) {
         try {
             FileProcessingRecord record = fileProcessingRecordService.getFileProcessingRecord(recordId);
             if (record == null) {
@@ -142,5 +151,4 @@ public class FileProcessingWorker {
             fileProcessingRecordService.updateStatusForRecord(recordId, ProcessingStatus.FAILED);
         }
     }
-
 }

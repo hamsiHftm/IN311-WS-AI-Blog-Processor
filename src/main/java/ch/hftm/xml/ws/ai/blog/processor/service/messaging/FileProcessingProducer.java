@@ -1,4 +1,4 @@
-package ch.hftm.xml.ws.ai.blog.processor.service;
+package ch.hftm.xml.ws.ai.blog.processor.service.messaging;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

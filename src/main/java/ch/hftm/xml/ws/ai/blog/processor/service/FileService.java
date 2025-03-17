@@ -38,22 +38,22 @@ public class FileService {
     }
 
     public String readHtmlFile(FileProcessingRecord record) throws IOException {
-        if (record == null || record.getHtmlFilePath() == null || record.getHtmlFilePath().isBlank()) {
+        if (record == null || record.getFilePath() == null || record.getFilePath().isBlank()) {
             throw new IllegalArgumentException("Invalid FileProcessingRecord: HTML file path is missing.");
         }
 
-        Path filePath = Path.of(record.getHtmlFilePath());
+        Path filePath = Path.of(record.getFilePath());
         File file = filePath.toFile();
 
         if (!file.exists() || !file.isFile()) {
-            throw new FileNotFoundException("HTML file not found: " + record.getHtmlFilePath());
+            throw new FileNotFoundException("HTML file not found: " + record.getFilePath());
         }
 
         if (!Files.isReadable(filePath)) {
-            throw new IOException("HTML file cannot be read: " + record.getHtmlFilePath());
+            throw new IOException("HTML file cannot be read: " + record.getFilePath());
         }
 
-        LOG.info("Reading HTML file: " + record.getHtmlFilePath());
+        LOG.info("Reading HTML file: " + record.getFilePath());
 
         return Files.readString(filePath, StandardCharsets.UTF_8);
     }

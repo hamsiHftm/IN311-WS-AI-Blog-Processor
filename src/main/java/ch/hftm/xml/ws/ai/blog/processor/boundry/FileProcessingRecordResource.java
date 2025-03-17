@@ -3,26 +3,24 @@ package ch.hftm.xml.ws.ai.blog.processor.boundry;
 import ch.hftm.xml.ws.ai.blog.processor.dto.response.FileUploadResponseDTO;
 import ch.hftm.xml.ws.ai.blog.processor.dto.response.ErrorResponseDTO1;
 import ch.hftm.xml.ws.ai.blog.processor.dto.response.ResponseDTO1;
+import ch.hftm.xml.ws.ai.blog.processor.entity.Blog;
 import ch.hftm.xml.ws.ai.blog.processor.entity.FileProcessingRecord;
+import ch.hftm.xml.ws.ai.blog.processor.entity.FileType;
 import ch.hftm.xml.ws.ai.blog.processor.entity.ProcessingStatus;
-import ch.hftm.xml.ws.ai.blog.processor.service.FileProcessingProducer;
-import ch.hftm.xml.ws.ai.blog.processor.service.FileProcessingRecordService;
+import ch.hftm.xml.ws.ai.blog.processor.service.*;
 
-import ch.hftm.xml.ws.ai.blog.processor.service.FileProcessingWorker;
-import ch.hftm.xml.ws.ai.blog.processor.service.FileService;
+import ch.hftm.xml.ws.ai.blog.processor.service.messaging.FileProcessingProducer;
+import ch.hftm.xml.ws.ai.blog.processor.service.model.FileProcessingRecordService;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
-import org.jboss.resteasy.reactive.RestQuery;
-import org.eclipse.microprofile.reactive.messaging.Channel;
-import org.eclipse.microprofile.reactive.messaging.Emitter;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -41,6 +39,9 @@ public class FileProcessingRecordResource {
     @Inject
     FileProcessingProducer fileProcessingProducer;
 
+    @Inject
+    JsonProcessingService jsonProcessingService;
+
     @POST
     @Path("/upload")
     @Transactional
@@ -51,10 +52,11 @@ public class FileProcessingRecordResource {
             if (!isValid) {
                 throw new IllegalStateException("File validation failed. Unknown error.");
             }
-            FileProcessingRecord record = fileProcessingRecordService.uploadFile(path);
+            FileType fileTypeEnum = FileType.valueOf(fileType.toUpperCase());
+            FileProcessingRecord record = fileProcessingRecordService.uploadFile(path, fileTypeEnum);
             return Response.ok(new ResponseDTO1(true, new FileUploadResponseDTO(
                     record.getId(),
-                    record.getHtmlFilePath(),
+                    record.getFilePath(),
                     record.getJsonFilePath(),
                     record.getStatus(),
                     "File uploaded successfully"
@@ -95,7 +97,7 @@ public class FileProcessingRecordResource {
             if (record.getStatus() == ProcessingStatus.PROCESSED) {
                 return Response.ok(new ResponseDTO1(true, new FileUploadResponseDTO(
                         recordId,
-                        record.getHtmlFilePath(),
+                        record.getFilePath(),
                         record.getJsonFilePath(),
                         ProcessingStatus.PROCESSED,
                         "Processing already completed. JSON file available at: " + record.getJsonFilePath() + record.getJsonFilePath()
@@ -106,7 +108,7 @@ public class FileProcessingRecordResource {
             if (record.getStatus() == ProcessingStatus.PROCESSING) {
                 return Response.ok(new ResponseDTO1(true, new FileUploadResponseDTO(
                         recordId,
-                        record.getHtmlFilePath(),
+                        record.getFilePath(),
                         record.getJsonFilePath(),
                         ProcessingStatus.PROCESSING,
                         "Processing already started."
@@ -124,7 +126,7 @@ public class FileProcessingRecordResource {
 
             return Response.ok(new ResponseDTO1(true, new FileUploadResponseDTO(
                     recordId,
-                    record.getHtmlFilePath(),
+                    record.getFilePath(),
                     record.getJsonFilePath(),
                     ProcessingStatus.PROCESSING,
                     "Processing started successfully."
@@ -153,7 +155,7 @@ public class FileProcessingRecordResource {
             // Construct response with relevant details
             return Response.ok(new ResponseDTO1(true, new FileUploadResponseDTO(
                     recordId,
-                    record.getHtmlFilePath(),
+                    record.getFilePath(),
                     record.getJsonFilePath(),
                     record.getStatus(),
                     "Current status: " + record.getStatus()
@@ -161,6 +163,46 @@ public class FileProcessingRecordResource {
 
         } catch (Exception e) {
             LOG.error("Unexpected error while retrieving status: ", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponseDTO1("Unexpected error: " + e.getMessage()))
+                    .build();
+        }
+    }
+
+    @POST
+    @Path("/parse/json/{fileProcessingRecordId}")
+    @Transactional
+    public Response parseJson(@PathParam("fileProcessingRecordId") Long recordId) {
+        try {
+            // Retrieve the record
+            FileProcessingRecord record = fileProcessingRecordService.getFileProcessingRecord(recordId);
+            if (record == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(new ErrorResponseDTO1("FileProcessingRecord not found for ID: " + recordId))
+                        .build();
+            }
+
+            // Ensure the file has been processed before parsing
+            if (record.getStatus() != ProcessingStatus.PROCESSED) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(new ErrorResponseDTO1("File has not been processed yet."))
+                        .build();
+            }
+
+            // Ensure JSON file exists
+            File jsonFile = new File(record.getJsonFilePath());
+            if (!jsonFile.exists() || !jsonFile.isFile()) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(new ErrorResponseDTO1("JSON file not found: " + jsonFile.getAbsolutePath()))
+                        .build();
+            }
+
+            // Call service to parse and save the blog
+            Blog blog = jsonProcessingService.parseAndSaveBlog(record);
+
+            return Response.ok(new ResponseDTO1(true, "Blog successfully stored with ID: " + blog.getId())).build();
+        } catch (Exception e) {
+            LOG.error("Unexpected error while parsing JSON: ", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(new ErrorResponseDTO1("Unexpected error: " + e.getMessage()))
                     .build();

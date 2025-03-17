@@ -16,11 +16,16 @@ public class FileProcessingRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String htmlFilePath;  // Path to the uploaded HTML file
+    private String filePath;  // Renamed from htmlFilePath (Can be HTML or PDF)
+
     private String jsonFilePath;  // Path to generated JSON file (AI output)
 
     @Enumerated(EnumType.STRING)
     private ProcessingStatus status = ProcessingStatus.PENDING; // PENDING, PROCESSED, etc.
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private FileType fileType;  // NEW: Defines if file is HTML or PDF
 
     @OneToOne
     @JoinColumn(name = "blog_id")
