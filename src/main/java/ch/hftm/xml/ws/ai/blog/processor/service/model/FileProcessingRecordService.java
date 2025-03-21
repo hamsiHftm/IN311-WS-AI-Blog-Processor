@@ -18,11 +18,11 @@ public class FileProcessingRecordService {
     FileProcessingRecordRepository fileProcessingRecordRepository;
 
     @Transactional
-    public FileProcessingRecord uploadFile(String htmlFilePath, FileType fileType) {
+    public FileProcessingRecord uploadFile(String htmlFilePath, FileType fileType, ProcessingStatus status) {
         FileProcessingRecord record = new FileProcessingRecord();
         record.setFilePath(htmlFilePath);
         record.setFileType(fileType);
-        record.setStatus(ProcessingStatus.PENDING);
+        record.setStatus(status);
 
         fileProcessingRecordRepository.persist(record);
         LOG.info("Stored file record: " + htmlFilePath);
@@ -40,6 +40,8 @@ public class FileProcessingRecordService {
         if (existingRecord != null) {
             existingRecord.setStatus(record.getStatus());
             existingRecord.setJsonFilePath(record.getJsonFilePath());
+            existingRecord.setFileType(record.getFileType());
+            existingRecord.setOpenAIFileId(record.getOpenAIFileId());
 
             fileProcessingRecordRepository.persistAndFlush(existingRecord);
         } else {

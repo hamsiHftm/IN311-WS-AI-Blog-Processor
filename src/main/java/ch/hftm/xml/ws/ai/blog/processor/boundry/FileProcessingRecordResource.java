@@ -19,6 +19,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
+import org.jboss.resteasy.reactive.common.NotImplementedYet;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -42,9 +43,19 @@ public class FileProcessingRecordResource {
     @Inject
     JsonProcessingService jsonProcessingService;
 
+    /*
+    @Inject
+    FileUploadingProducer fileUploadingProducer;
+
+    @Inject
+    OpenAIFileService openAIFileService;
+
+    @Inject
+    PDFProcessingAIService pdfProcessingAIService;
+     */
+
     @POST
     @Path("/upload")
-    @Transactional
     public Response uploadFile(@QueryParam("path") @NotBlank String path,
                                @QueryParam("fileType") @Pattern(regexp = "pdf|html", message = "fileType must be either 'pdf' or 'html'") String fileType) {
         try {
@@ -53,7 +64,30 @@ public class FileProcessingRecordResource {
                 throw new IllegalStateException("File validation failed. Unknown error.");
             }
             FileType fileTypeEnum = FileType.valueOf(fileType.toUpperCase());
-            FileProcessingRecord record = fileProcessingRecordService.uploadFile(path, fileTypeEnum);
+            ProcessingStatus status = fileTypeEnum == FileType.HTML ? ProcessingStatus.UPLOADED : ProcessingStatus.UPLOADING;
+            FileProcessingRecord record = fileProcessingRecordService.uploadFile(path, fileTypeEnum, status);
+
+            if (fileTypeEnum == FileType.PDF) {
+                /*
+                fileProcessingRecordService.updateStatusForRecord(record.getId(), ProcessingStatus.UPLOADED);
+                // fileUploadingProducer.sendFileUploadRequest(record.getId());
+
+                File file = new File(record.getFilePath());
+                if (!file.exists() || !file.isFile()) {
+                    LOG.error("File not found: " + file.getAbsolutePath());
+                    throw new FileNotFoundException("File not found: " + file.getAbsolutePath());
+                }
+
+                // checking pdf upload
+                // String field = openAIFileService.uploadFileToOpenAI(file);
+                String fileId = "file-F3JnQY9wp7d2aZoE5XdRvP";
+                record.setOpenAIFileId(fileId);
+                String response = pdfProcessingAIService.extractContent(fileId);
+                return Response.status(Response.Status.OK).entity(response).build();
+                 */
+                throw new NotImplementedYet();
+            }
+
             return Response.ok(new ResponseDTO1(true, new FileUploadResponseDTO(
                     record.getId(),
                     record.getFilePath(),
@@ -93,26 +127,29 @@ public class FileProcessingRecordResource {
                         .build();
             }
 
-            // Check if the file is already processed
-            if (record.getStatus() == ProcessingStatus.PROCESSED) {
-                return Response.ok(new ResponseDTO1(true, new FileUploadResponseDTO(
-                        recordId,
-                        record.getFilePath(),
-                        record.getJsonFilePath(),
-                        ProcessingStatus.PROCESSED,
-                        "Processing already completed. JSON file available at: " + record.getJsonFilePath() + record.getJsonFilePath()
-                ))).build();
+            // check if the file is still on uploaded
+            if (record.getStatus() == ProcessingStatus.UPLOADING) {
+                return generateSuccessResponse(recordId, record, "Uploading is not completed. So pls wait..");
             }
 
             // Check if the file is already processed
             if (record.getStatus() == ProcessingStatus.PROCESSING) {
-                return Response.ok(new ResponseDTO1(true, new FileUploadResponseDTO(
-                        recordId,
-                        record.getFilePath(),
-                        record.getJsonFilePath(),
-                        ProcessingStatus.PROCESSING,
-                        "Processing already started."
-                ))).build();
+                return generateSuccessResponse(recordId, record, "Processing already started.");
+            }
+
+            // Check if the file is already processed
+            if (record.getStatus() == ProcessingStatus.PROCESSED) {
+                return generateSuccessResponse(recordId, record, "Processing already completed. JSON file available at: " + record.getJsonFilePath() + record.getJsonFilePath());
+            }
+
+            // Check if the file is already processed
+            if (record.getStatus() == ProcessingStatus.STORED) {
+                return generateSuccessResponse(recordId, record, "Blog is already stored in db. Pls check this url to see the content: http://localhost:8080/blog-preview/" + record.getBlog().getId());
+            }
+
+            // Check if the file is already processed
+            if (record.getStatus() == ProcessingStatus.FAILED) {
+                return generateSuccessResponse(recordId, record, "Something went wrong with this file. Pls check the fail");
             }
 
             // Update record status and file path
@@ -121,19 +158,12 @@ public class FileProcessingRecordResource {
 
             // Send processing request to Kafka
             fileProcessingProducer.sendProcessingRequest(recordId);
-
             LOG.info("Started JSON generation for record ID: " + recordId);
-
-            return Response.ok(new ResponseDTO1(true, new FileUploadResponseDTO(
-                    recordId,
-                    record.getFilePath(),
-                    record.getJsonFilePath(),
-                    ProcessingStatus.PROCESSING,
-                    "Processing started successfully."
-            ))).build();
+            return generateSuccessResponse(recordId, record, "Processing started successfully.");
 
         } catch (Exception e) {
             LOG.error("Unexpected error while generating JSON: ", e);
+            fileProcessingRecordService.updateStatusForRecord(recordId, ProcessingStatus.FAILED);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(new ErrorResponseDTO1("Unexpected error: " + e.getMessage()))
                     .build();
@@ -152,15 +182,7 @@ public class FileProcessingRecordResource {
                         .build();
             }
 
-            // Construct response with relevant details
-            return Response.ok(new ResponseDTO1(true, new FileUploadResponseDTO(
-                    recordId,
-                    record.getFilePath(),
-                    record.getJsonFilePath(),
-                    record.getStatus(),
-                    "Current status: " + record.getStatus()
-            ))).build();
-
+            return generateSuccessResponse(recordId, record, "Current status: " + record.getStatus());
         } catch (Exception e) {
             LOG.error("Unexpected error while retrieving status: ", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -182,11 +204,29 @@ public class FileProcessingRecordResource {
                         .build();
             }
 
-            // Ensure the file has been processed before parsing
-            if (record.getStatus() != ProcessingStatus.PROCESSED) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(new ErrorResponseDTO1("File has not been processed yet."))
-                        .build();
+            // check if the file is still on uploaded
+            if (record.getStatus() == ProcessingStatus.UPLOADING) {
+                return generateSuccessResponse(recordId, record, "Uploading is not completed. After that u need to start to generate json.");
+            }
+
+            // check if the file is still on uploaded
+            if (record.getStatus() == ProcessingStatus.UPLOADED) {
+                return generateSuccessResponse(recordId, record, "Pls first start to generate json.");
+            }
+
+            // Check if the file is already processed
+            if (record.getStatus() == ProcessingStatus.STORED) {
+                return generateSuccessResponse(recordId, record, "Blog is already stored in db. Pls check this url to see the content: http://localhost:8080/blog-preview/" + record.getBlog().getId());
+            }
+
+            // Check if the file is already processed
+            if (record.getStatus() == ProcessingStatus.PROCESSING) {
+                return generateSuccessResponse(recordId, record, "Processing not completed. Need to wait until json file is created. so pls wait.");
+            }
+
+            // Check if the file is already processed
+            if (record.getStatus() == ProcessingStatus.FAILED) {
+                return generateSuccessResponse(recordId, record, "Something went wrong with this file.");
             }
 
             // Ensure JSON file exists
@@ -199,13 +239,23 @@ public class FileProcessingRecordResource {
 
             // Call service to parse and save the blog
             Blog blog = jsonProcessingService.parseAndSaveBlog(record);
-
             return Response.ok(new ResponseDTO1(true, "Blog successfully stored with ID: " + blog.getId())).build();
         } catch (Exception e) {
             LOG.error("Unexpected error while parsing JSON: ", e);
+            fileProcessingRecordService.updateStatusForRecord(recordId, ProcessingStatus.FAILED);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(new ErrorResponseDTO1("Unexpected error: " + e.getMessage()))
                     .build();
         }
+    }
+
+    private Response generateSuccessResponse(Long recordId, FileProcessingRecord record, String msg) {
+        return Response.ok(new ResponseDTO1(true, new FileUploadResponseDTO(
+                recordId,
+                record.getFilePath(),
+                record.getJsonFilePath(),
+                ProcessingStatus.UPLOADING,
+                msg
+        ))).build();
     }
 }

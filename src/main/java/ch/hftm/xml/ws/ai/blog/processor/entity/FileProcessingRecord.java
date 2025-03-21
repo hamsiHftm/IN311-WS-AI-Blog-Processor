@@ -17,11 +17,11 @@ public class FileProcessingRecord {
     private Long id;
 
     private String filePath;  // Renamed from htmlFilePath (Can be HTML or PDF)
-
+    private String openAIFileId;
     private String jsonFilePath;  // Path to generated JSON file (AI output)
 
     @Enumerated(EnumType.STRING)
-    private ProcessingStatus status = ProcessingStatus.PENDING; // PENDING, PROCESSED, etc.
+    private ProcessingStatus status = ProcessingStatus.UPLOADING; // PENDING, PROCESSED, etc.
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

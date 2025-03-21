@@ -12,7 +12,7 @@ public class FileProcessingProducer {
     private static final Logger LOG = Logger.getLogger(FileProcessingProducer.class);
 
     @Inject
-    @Channel("file-processing-requests") // Outgoing topic
+    @Channel("file-processing-requests")
     Emitter<Long> fileProcessingEmitter;
 
     public void sendProcessingRequest(Long recordId) {
