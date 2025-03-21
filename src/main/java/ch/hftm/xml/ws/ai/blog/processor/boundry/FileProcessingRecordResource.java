@@ -1,8 +1,8 @@
 package ch.hftm.xml.ws.ai.blog.processor.boundry;
 
-import ch.hftm.xml.ws.ai.blog.processor.dto.response.FileUploadResponseDTO;
-import ch.hftm.xml.ws.ai.blog.processor.dto.response.ErrorResponseDTO1;
-import ch.hftm.xml.ws.ai.blog.processor.dto.response.ResponseDTO1;
+import ch.hftm.xml.ws.ai.blog.processor.dto.FileUploadResponseDTO;
+import ch.hftm.xml.ws.ai.blog.processor.dto.ErrorResponseDTO1;
+import ch.hftm.xml.ws.ai.blog.processor.dto.ResponseDTO1;
 import ch.hftm.xml.ws.ai.blog.processor.entity.Blog;
 import ch.hftm.xml.ws.ai.blog.processor.entity.FileProcessingRecord;
 import ch.hftm.xml.ws.ai.blog.processor.entity.FileType;

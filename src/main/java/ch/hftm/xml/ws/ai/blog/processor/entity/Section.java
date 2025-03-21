@@ -18,15 +18,15 @@ public class Section {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String sectionTitle;  // Name of the section
+    private String sectionTitle;
 
     @ManyToOne
     @JoinColumn(name = "blog_id", nullable = false)
-    private Blog blog; // Each section belongs to a blog
+    private Blog blog;
 
     @ManyToOne
     @JoinColumn(name = "parent_section_id")
-    private Section parentSection; // For nested sections
+    private Section parentSection;
 
     @OneToMany(mappedBy = "parentSection", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Section> subSections = new ArrayList<>();

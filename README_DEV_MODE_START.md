@@ -1,65 +1,39 @@
-# 🚀 Running Kafka with Docker (Without Docker-Compose)
+# Getting Started: AI Blog Processor
 
-This guide provides step-by-step instructions on how to run **Kafka** manually using `docker run` commands without needing a `docker-compose.yml` file.
+This guide helps you set up and run the AI Blog Processor project from scratch.
 
 ---
 
-## ** Start Kafka**
-Now start **Kafka**:
+## 1. Clone the Project
 
-```sh
-docker run -d --name kafka -p 9092:9092 \
-  -e KAFKA_CFG_NODE_ID=1 \
-  -e KAFKA_CFG_PROCESS_ROLES=controller,broker \
-  -e KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@localhost:9093 \
-  -e KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093 \
-  -e KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
-  -e KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER \
-  -e KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT \
-  bitnami/kafka:latest
-```
-
-## **Create a Kafka Topic**
-Kafka **does not auto-create topics**, so create one manually for **file-processing requests**:
-
-```sh
-docker exec -it kafka kafka-topics --create \
-  --topic processing_requests \
-  --bootstrap-server localhost:9092 \
-  --partitions 3 \
-  --replication-factor 1
-```
-
-### **Explanation:**
-- Creates a topic **`processing_requests`** with **3 partitions** and **replication factor 1**.
-
-- **List Available Topics:**
-```sh
-docker exec -it kafka kafka-topics --list --bootstrap-server localhost:9092
+```bash
+git clone https://github.com/hamsiHftm/IN311-WS-AI-Blog-Processor.git
+cd IN311-WS-AI-Blog-Processor
 ```
 
 ---
 
-## **Stop Kafka**
-To **stop Kafka**:
-```sh
-docker stop kafka
+## 2. Configure the Environment
+
+Duplicate the `.env_template` file and rename it to `.env`:
+
+```bash
+cp .env_template .env
 ```
 
-To **remove Kafka & Zookeeper**:
-```sh
-docker rm kafka zookeeper
+Open the `.env` file and set your OpenAI API key:
+
+```env
+OPEN_AI_API_KEY=sk-your-key
 ```
 
 ---
 
-## **✅ Summary**
-**Start Zookeeper:**
-```sh
-docker run -d --name zookeeper -p 2181:2181 -e ZOOKEEPER_CLIENT_PORT=2181 confluentinc/cp-zookeeper:latest
-```
-**Start Kafka:**
-```sh
+## 3. Start Kafka (Bitnami Kafka Container)
+
+Use the following command to start a Kafka instance:
+
+```bash
 docker run -d \
   --name kafka \
   --restart always \
@@ -73,15 +47,98 @@ docker run -d \
   -e KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT \
   bitnami/kafka:latest
 ```
-**Create Kafka Topic:**
-```sh
-docker exec -it kafka kafka-topics --create --topic processing_requests --bootstrap-server localhost:9092 --partitions 3 --replication-factor 1
-```
-**List All Topics in Kafka**
-```sh
-docker exec -it kafka kafka-topics.sh --list --bootstrap-server localhost:9092
-```
+
 ---
 
-🎯 Now Kafka is ready to use! 🚀
+## 4. Start the Quarkus Project
 
+```bash
+./mvnw quarkus:dev
+```
+
+---
+
+## 5. Open Swagger UI
+
+Navigate to:  
+[http://localhost:8080/q/dev-ui/io.quarkus.quarkus-smallrye-openapi/swagger-ui](http://localhost:8080/q/dev-ui/io.quarkus.quarkus-smallrye-openapi/swagger-ui)
+
+---
+
+## 6. Upload a Blog HTML File
+
+Prepare a sample HTML file with blog content.  
+Copy its **absolute path**.
+
+Execute the endpoint:
+
+**POST** `/files/upload`
+
+With parameters:
+- `fileType`: `html`
+- `path`: absolute file path to your HTML file
+
+✅ If successful, you'll receive a JSON response with a `recordId` and status `UPLOADED`.
+
+---
+
+## 7. Generate JSON from HTML (Asynchronous AI Processing)
+
+Execute:
+
+**POST** `/files/generate/json/{fileProcessingRecordId}`
+
+Replace `{fileProcessingRecordId}` with the noted ID.  
+Wait until status becomes `PROCESSED`.
+
+---
+
+## 8. Parse JSON and Store in DB
+
+Execute:
+
+**POST** `/files/parse/json/{fileProcessingRecordId}`
+
+Replace `{fileProcessingRecordId}` with the same ID.  
+Wait until status becomes `STORED`.
+
+---
+
+## 9. Check Processing Status
+
+Execute:
+
+**GET** `/files/status/{fileProcessingRecordId}`
+
+This returns the current processing status of the file.
+
+---
+
+## 10. Preview Stored Blog in HTML Format
+
+Open in browser:
+
+```
+http://localhost:8080/blog-preview/{fileProcessingRecordId}
+```
+
+Replace `{fileProcessingRecordId}` with your noted ID.  
+✅ If HTML renders correctly, the workflow completed successfully.
+
+---
+
+## 🔧 Troubleshooting Tips
+
+### Kafka Topic Missing?
+
+Check if the Kafka topic was created:
+
+```bash
+docker exec -it kafka kafka-topics.sh --list --bootstrap-server localhost:9092
+```
+
+If the topic `processing-requests` is **not listed**, restart Kafka and the Quarkus project.
+
+---
+
+That's it! You're good to go 🚀

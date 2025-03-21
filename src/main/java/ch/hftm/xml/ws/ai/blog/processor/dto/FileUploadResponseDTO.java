@@ -1,4 +1,4 @@
-package ch.hftm.xml.ws.ai.blog.processor.dto.response;
+package ch.hftm.xml.ws.ai.blog.processor.dto;
 
 import ch.hftm.xml.ws.ai.blog.processor.entity.ProcessingStatus;
 

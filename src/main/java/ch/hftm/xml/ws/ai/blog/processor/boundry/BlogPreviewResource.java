@@ -1,8 +1,6 @@
 package ch.hftm.xml.ws.ai.blog.processor.boundry;
 
 import ch.hftm.xml.ws.ai.blog.processor.entity.Blog;
-import ch.hftm.xml.ws.ai.blog.processor.entity.ContentBlock;
-import ch.hftm.xml.ws.ai.blog.processor.entity.Section;
 import ch.hftm.xml.ws.ai.blog.processor.service.BlogHtmlGeneratorService;
 import ch.hftm.xml.ws.ai.blog.processor.service.model.BlogService;
 import jakarta.inject.Inject;
@@ -10,8 +8,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
-
-import java.util.List;
 
 @Path("/blog-preview")
 public class BlogPreviewResource {

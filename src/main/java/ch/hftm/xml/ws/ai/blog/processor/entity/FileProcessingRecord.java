@@ -16,7 +16,7 @@ public class FileProcessingRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String filePath;  // Renamed from htmlFilePath (Can be HTML or PDF)
+    private String filePath;
     private String openAIFileId;
     private String jsonFilePath;  // Path to generated JSON file (AI output)
 

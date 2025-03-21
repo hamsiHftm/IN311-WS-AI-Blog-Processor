@@ -2,9 +2,6 @@
 
 This document describes the structured JSON format used to represent blog content processed by AI. The JSON format captures headings, paragraphs, images, lists, tables, and nested sections in a structured way.
 
-## File Location
-The example JSON file is available in the `resources` folder under the name `example_blog_structure.json`.
-
 ## JSON Structure
 
 ```json
