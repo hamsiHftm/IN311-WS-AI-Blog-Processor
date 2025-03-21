@@ -254,7 +254,7 @@ public class FileProcessingRecordResource {
                 recordId,
                 record.getFilePath(),
                 record.getJsonFilePath(),
-                ProcessingStatus.UPLOADING,
+                record.getStatus(),
                 msg
         ))).build();
     }
