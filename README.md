@@ -38,52 +38,7 @@ The processing is handled using **Mutiny's `Uni`** to ensure that threads are **
 
 ## Workflow Overview
 
-```
-+--------------------------+
-|  User Uploads HTML File  |
-+------------+-------------+
-             |
-             v
-+------------------------------+
-| Validate & Save File Info   |
-| (absolute path + status)    |
-+------------+----------------+
-             |
-             v
-+------------------------------+
-| User starts JSON Generation |
-|    (Triggers Kafka Event)   |
-+------------+----------------+
-             |
-             v
-+--------------------------------------+
-| Kafka Topic: file-processing-requests|
-+----------------+---------------------+
-                 |
-                 v
-+--------------------------------+
-| Worker processes file with AI |
-| (HTML -> JSON via LangChain4j)|
-+----------------+---------------+
-                 |
-                 v
-+----------------------------------------------+
-| Save JSON to /data/output/json/{id}.json     |
-| Save absolute path to DB                     |
-+----------------+-----------------------------+
-                 |
-                 v
-+-------------------------------+
-| User triggers DB storage      |
-| (Parse & Save Blog + Sections)|
-+----------------+--------------+
-                 |
-                 v
-+-------------------------------+
-| Preview Blog via HTML Page    |
-| /blog-preview/{blogId}        |
-+-------------------------------+
-```
+![Workflow Diagramm](data/image/workflow_diagramm.png)
 
 ## REST API – Endpoints & Examples
 
@@ -154,7 +109,8 @@ The full JSON schema expected and processed by the system is documented in:
 
 ## Class Diagram
 
-A class diagram of the entities (Blog, Section, ContentBlock, etc.) will be added here soon for a clear visual understanding of the database structure.
+Below is the visual class diagram that shows how the core entities like Blog, Section, and ContentBlock are structured and related to each other.
+![Class Diagram](data/image/class_diagramm.png)
 
 ## How to Start & Test
 
